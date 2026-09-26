@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VIP Hub Mini App</title>
+    
+    <!-- 1. PLATFORM BAŞLIĞI (İstediğin ismi yazabilirsin) -->
+    <title>ScannerOfChannel</title>
+    
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -86,6 +89,38 @@
             color: #000000;
         }
 
+        /* Kategori Filtre Butonları */
+        .category-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 14px;
+            scrollbar-width: none;
+        }
+
+        .category-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cat-btn {
+            background: #181818;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .cat-btn.active {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+        }
+
         /* İçerik Ekranları */
         .page {
             display: none;
@@ -114,37 +149,38 @@
             margin-bottom: 10px;
         }
 
-        /* Dizin Liste Kartı */
+        /* Dizin Tıklanabilir Kanal Kartı */
         .channel-card {
             background: #101010;
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 14px;
-            margin-bottom: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.2s;
         }
 
-        .channel-card:last-child {
-            margin-bottom: 0;
+        .channel-card:active {
+            transform: scale(0.98);
+            border-color: var(--muted);
         }
 
-        .channel-top {
+        .channel-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            margin-bottom: 6px;
         }
 
-        .channel-info h4 {
+        .channel-title {
             font-size: 14px;
             font-weight: 700;
         }
 
-        .channel-info p {
+        .channel-sub {
             font-size: 12px;
             color: var(--muted);
-            margin-top: 2px;
+            line-height: 1.4;
         }
 
         .comm-badge {
@@ -156,6 +192,17 @@
             padding: 4px 8px;
             border-radius: 6px;
             white-space: nowrap;
+        }
+
+        .channel-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border);
+            font-size: 11px;
+            color: var(--muted);
         }
 
         /* Form Elemanları */
@@ -227,7 +274,7 @@
             margin-top: 6px;
         }
 
-        /* Modal (Pop-up) */
+        /* Modal (Kanal Detay Penceresi) */
         .modal {
             display: none;
             position: fixed;
@@ -254,13 +301,22 @@
             flex-direction: column;
             gap: 14px;
         }
+
+        .empty-box {
+            text-align: center;
+            padding: 30px 10px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
 
     <!-- Header -->
     <div class="header">
-        <h2>VIP Platform Hub</h2>
+        <!-- 2. PLATFORM ADI (Buradan değiştirebilirsin) -->
+        <h2>ScannerOfChannel</h2>
         <div class="user-tag" id="user-display">@kullanici</div>
     </div>
 
@@ -272,56 +328,24 @@
         <button class="nav-item" onclick="showPage('basvuru')">Başvuru</button>
     </div>
 
-    <!-- 1. EKRAN: DİZİN (KANALLAR VE ÖZEL DAVET LİNKLERİ) -->
+    <!-- 1. EKRAN: DİZİN -->
     <div id="page-dizin" class="page active">
+        
+        <!-- Kategori Filtreleri -->
+        <div class="category-scroll">
+            <button class="cat-btn active" onclick="filterCat('all', this)">Tümü</button>
+            <button class="cat-btn" onclick="filterCat('kripto', this)">Kripto & Finans</button>
+            <button class="cat-btn" onclick="filterCat('yazilim', this)">Yazılım & Bot</button>
+            <button class="cat-btn" onclick="filterCat('eticaret', this)">E-Ticaret</button>
+            <button class="cat-btn" onclick="filterCat('pazarlama', this)">Pazarlama</button>
+        </div>
+
         <div class="card">
-            <div class="card-title">VIP Kanallar & Özel Komisyon Linkleri</div>
-            <p style="font-size: 12px; color: var(--muted); margin-bottom: 14px;">
-                Aşağıdaki kanallardan birini seçip özel davet linkinizi oluşturun. Linkinizle katılan her aboneden kanal sahibinin belirlediği komisyonu kazanın!
-            </p>
-
-            <!-- KANAL 1 -->
-            <div class="channel-card">
-                <div class="channel-top">
-                    <div class="channel-info">
-                        <h4>VIP Kripto Sinyal</h4>
-                        <p>Günlük sinyal ve piyasa analizleri</p>
-                    </div>
-                    <span class="comm-badge">%20 Komisyon</span>
-                </div>
-                <button class="btn btn-outline" onclick="openRefModal('VIP Kripto Sinyal', 'chn_kripto_01')">
-                    🔗 Özel Davet Linki Üret
-                </button>
+            <div class="card-title">VIP Kanallar & İlanlar</div>
+            
+            <div id="channel-list">
+                <!-- Kanallar buraya eklenecek -->
             </div>
-
-            <!-- KANAL 2 -->
-            <div class="channel-card">
-                <div class="channel-top">
-                    <div class="channel-info">
-                        <h4>Otomatik Satış Botu</h4>
-                        <p>E-Ticaret stok & müşteri otomasyonu</p>
-                    </div>
-                    <span class="comm-badge">%15 Komisyon</span>
-                </div>
-                <button class="btn btn-outline" onclick="openRefModal('Otomatik Satış Botu', 'chn_satis_02')">
-                    🔗 Özel Davet Linki Üret
-                </button>
-            </div>
-
-            <!-- KANAL 3 -->
-            <div class="channel-card">
-                <div class="channel-top">
-                    <div class="channel-info">
-                        <h4>Dijital Pazarlama Kulübü</h4>
-                        <p>Büyüme ve reklam stratejileri</p>
-                    </div>
-                    <span class="comm-badge">%25 Komisyon</span>
-                </div>
-                <button class="btn btn-outline" onclick="openRefModal('Dijital Pazarlama Kulübü', 'chn_pazarlama_03')">
-                    🔗 Özel Davet Linki Üret
-                </button>
-            </div>
-
         </div>
     </div>
 
@@ -338,7 +362,7 @@
         </div>
     </div>
 
-    <!-- 3. EKRAN: CÜZDAN & PARA ÇEKME (Genel link kaldırıldı) -->
+    <!-- 3. EKRAN: CÜZDAN & PARA ÇEKME -->
     <div id="page-cuzdan" class="page">
         <div class="card">
             <div class="card-title">Kanal Komisyon Kazançları</div>
@@ -365,7 +389,7 @@
         </div>
     </div>
 
-    <!-- 4. EKRAN: BAŞVURU (Kanal Sahibinin Komisyon Tanımlama Alanı) -->
+    <!-- 4. EKRAN: BAŞVURU -->
     <div id="page-basvuru" class="page">
         <div class="card">
             <div class="card-title">Yeni İlan / Kanal Başvurusu</div>
@@ -376,9 +400,10 @@
             <div class="field">
                 <label>Kategori</label>
                 <select id="app-type" class="input">
-                    <option value="VIP Kanal">VIP Kanal</option>
-                    <option value="Sponsorlu İlan">Sponsorlu İlan</option>
-                    <option value="Ürün / Hizmet">Ürün / Hizmet</option>
+                    <option value="kripto">Kripto & Finans</option>
+                    <option value="yazilim">Yazılım & Bot</option>
+                    <option value="eticaret">E-Ticaret</option>
+                    <option value="pazarlama">Pazarlama</option>
                 </select>
             </div>
             <div class="field">
@@ -386,24 +411,35 @@
                 <input type="text" id="app-link" class="input" placeholder="https://t.me/...">
             </div>
             <div class="field">
-                <label>Üye Getirene Verilecek Komisyon Oranı (%)</label>
+                <label>Getirene Verilecek Komisyon Oranı (%)</label>
                 <input type="number" id="app-comm" class="input" placeholder="Örn: 20" min="0" max="100">
             </div>
             <button class="btn" onclick="sendApplication()">Başvuruyu İlet</button>
-            <div class="info-text">Verdiğiniz komisyon oranı Dizin sayfasında kullanıcıların davet linki üretmesi için gösterilecektir.</div>
+            <div class="info-text">Başvurunuz onaylandıktan sonra Dizin sekmesinde komisyon oranınızla yayınlanacaktır.</div>
         </div>
     </div>
 
-    <!-- MODAL: KANALA ÖZEL LINK POPUP -->
-    <div id="ref-modal" class="modal">
+    <!-- KANAL DETAY MODALI -->
+    <div id="channel-modal" class="modal">
         <div class="modal-content">
-            <h3 id="modal-channel-name" style="font-size: 15px;">Kanal Adı</h3>
-            <p style="font-size: 12px; color: var(--muted);">Bu kanala özel referral linkiniz oluşturuldu:</p>
-            <input type="text" id="modal-ref-link" class="input" readonly>
-            <div class="btn-group">
-                <button class="btn" onclick="copyModalLink()">Kopyala</button>
-                <button class="btn btn-outline" onclick="closeRefModal()">Kapat</button>
+            <h3 id="m-title" style="font-size: 16px;">Kanal Adı</h3>
+            <p id="m-desc" style="font-size: 13px; color: var(--muted); line-height: 1.4;">Açıklama</p>
+            
+            <div style="background: #101010; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; display: flex; justify-content: space-between;">
+                <span>Kazanılacak Komisyon:</span>
+                <b id="m-comm" style="color: var(--green);">%0</b>
             </div>
+
+            <div class="field">
+                <label>Sana Özel Davet Linkin:</label>
+                <input type="text" id="m-ref-link" class="input" readonly>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn" onclick="copyRefLink()">Link Kopyala</button>
+                <button class="btn btn-outline" id="m-join-btn" onclick="openChannelLink()">Kanala Git</button>
+            </div>
+            <button class="btn btn-outline" style="border:none; color: var(--muted); margin-top:-6px;" onclick="closeModal()">Kapat</button>
         </div>
     </div>
 
@@ -412,7 +448,7 @@
         tg.expand();
         tg.ready();
 
-        // BOT KULLANICI ADI (BotFather'daki adın neyse tırnak içine yaz)
+        // BOT KULLANICI ADINIZ (BotFather'dan aldığınız nick)
         const BOT_USERNAME = "VIPHubBot"; 
 
         let userId = "0000";
@@ -421,25 +457,95 @@
             document.getElementById('user-display').innerText = `@${tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name}`;
         }
 
-        // Kanala Özel Link Oluşturma Fonksiyonu
-        function openRefModal(channelName, channelId) {
-            document.getElementById('modal-channel-name').innerText = channelName;
-            // Format: https://t.me/BotUsername?start=ref_USERID_CHANNELID
-            const generatedLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}_${channelId}`;
-            document.getElementById('modal-ref-link').value = generatedLink;
-            document.getElementById('ref-modal').classList.add('active');
+        /* 
+           ===============================================================
+           GERÇEK KANALLARI BURAYA EKLEYEBİLİRSİNİZ.
+           Şu an dizi BOŞTUR. Kanal eklendikçe aşağıdaki formatta yazabilirsiniz:
+           
+           { 
+               id: "kanal_1", 
+               cat: "kripto", 
+               title: "Kanal Adı", 
+               desc: "Açıklama", 
+               comm: 20, 
+               link: "https://t.me/kanal_linki" 
+           }
+           ===============================================================
+        */
+        const channelsData = [];
+
+        let activeChannel = null;
+
+        // Kanalları Ekrana Basma Fonksiyonu
+        function renderChannels(category = 'all') {
+            const container = document.getElementById('channel-list');
+            container.innerHTML = "";
+
+            const filtered = category === 'all' ? channelsData : channelsData.filter(c => c.cat === category);
+
+            // Kanal yoksa gösterilecek boş ekran uyarısı
+            if(filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-box">
+                        <p><b>Henüz onaylanmış bir kanal yok.</b></p>
+                        <p style="margin-top:6px; font-size:11px;">Kendi kanalınızı ekleyip komisyon tanımlamak için <b>Başvuru</b> sekmesini kullanabilirsiniz.</p>
+                    </div>`;
+                return;
+            }
+
+            filtered.forEach(c => {
+                const el = document.createElement('div');
+                el.className = 'channel-card';
+                el.onclick = () => openModal(c);
+                el.innerHTML = `
+                    <div class="channel-header">
+                        <div class="channel-title">${c.title}</div>
+                        <span class="comm-badge">%${c.comm} Komisyon</span>
+                    </div>
+                    <div class="channel-sub">${c.desc}</div>
+                    <div class="channel-footer">
+                        <span>Kategori: ${c.cat.toUpperCase()}</span>
+                        <span style="color: #fff; font-weight:600;">İncele & Link Al ➔</span>
+                    </div>
+                `;
+                container.appendChild(el);
+            });
         }
 
-        function closeRefModal() {
-            document.getElementById('ref-modal').classList.remove('active');
+        function filterCat(cat, btn) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderChannels(cat);
         }
 
-        function copyModalLink() {
-            const input = document.getElementById('modal-ref-link');
+        function openModal(channel) {
+            activeChannel = channel;
+            document.getElementById('m-title').innerText = channel.title;
+            document.getElementById('m-desc').innerText = channel.desc;
+            document.getElementById('m-comm').innerText = `%${channel.comm}`;
+            
+            const refLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}_${channel.id}`;
+            document.getElementById('m-ref-link').value = refLink;
+
+            document.getElementById('channel-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('channel-modal').classList.remove('active');
+        }
+
+        function copyRefLink() {
+            const input = document.getElementById('m-ref-link');
             input.select();
             navigator.clipboard.writeText(input.value).then(() => {
-                tg.showAlert("Kanala özel davet linkiniz kopyalandı!");
+                tg.showAlert("Özel davet linkiniz kopyalandı!");
             });
+        }
+
+        function openChannelLink() {
+            if (activeChannel && activeChannel.link) {
+                tg.openTelegramLink(activeChannel.link);
+            }
         }
 
         function showPage(pageId) {
@@ -499,6 +605,9 @@
                 commission: comm
             }));
         }
+
+        // Sayfa açıldığında dizini yükle
+        renderChannels('all');
     </script>
 </body>
 </html>
