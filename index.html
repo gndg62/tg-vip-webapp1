@@ -165,12 +165,19 @@
             border-radius: 8px;
             padding: 12px;
             color: #ffffff;
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
+            width: 100%;
         }
 
         .input:focus {
             border-color: var(--accent);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
         }
 
         .btn {
@@ -178,12 +185,17 @@
             color: #000000;
             border: none;
             border-radius: 8px;
-            padding: 14px;
+            padding: 12px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             width: 100%;
-            margin-top: 6px;
+        }
+
+        .btn-secondary {
+            background: #222222;
+            color: #ffffff;
+            border: 1px solid var(--border);
         }
 
         .btn:active {
@@ -265,12 +277,25 @@
         </div>
     </div>
 
-    <!-- 3. EKRAN: CÜZDAN & PARA ÇEKME -->
+    <!-- 3. EKRAN: CÜZDAN, DAVET LİNKİ & PARA ÇEKME -->
     <div id="page-cuzdan" class="page">
         <div class="card">
             <div class="card-title">Mevcut Bakiye</div>
             <div class="balance">₺0.00</div>
             <p style="font-size: 11px; color: var(--muted);">Minimum çekim alt limiti: 200.00 TL</p>
+        </div>
+
+        <!-- DİNAMİK DAVET / REFERANS LİNKİ ALANI -->
+        <div class="card">
+            <div class="card-title">Sana Özel Davet Linki</div>
+            <div class="field">
+                <input type="text" id="ref-link-input" class="input" readonly value="Yükleniyor...">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="copyRefLink()">Kopyala</button>
+                <button class="btn" onclick="shareRefLink()">Telegram'da Paylaş</button>
+            </div>
+            <div class="info-text">Bu linkle kaydolan kişilerden komisyon kazanırsınız.</div>
         </div>
 
         <div class="card">
@@ -288,7 +313,6 @@
                 <input type="text" id="payout-iban" class="input" placeholder="TR00 0000 0000 0000 0000 0000 00">
             </div>
             <button class="btn" onclick="sendPayout()">Talebi Gönder</button>
-            <div class="info-text">Talep onaylandıktan sonra bakiyenizden düşülerek hesabınıza aktarılır.</div>
         </div>
     </div>
 
@@ -321,9 +345,39 @@
         tg.expand();
         tg.ready();
 
+        // BOT KULLANICI ADI (BotFather'daki kullanıcı adın neyse tırnak içine onu yaz)
+        const BOT_USERNAME = "ScannerOfChannel_bot"; 
+
+        let userId = "";
+
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const u = tg.initDataUnsafe.user;
+            userId = u.id;
             document.getElementById('user-display').innerText = `@${u.username || u.first_name}`;
+            
+            // Kişiye Özel Davet Linkini Oluştur
+            const refLink = `https://t.me/${BOT_USERNAME}?start=${userId}`;
+            document.getElementById('ref-link-input').value = refLink;
+        } else {
+            document.getElementById('ref-link-input').value = `https://t.me/${BOT_USERNAME}`;
+        }
+
+        // Link Kopyalama Fonksiyonu
+        function copyRefLink() {
+            const input = document.getElementById('ref-link-input');
+            input.select();
+            navigator.clipboard.writeText(input.value).then(() => {
+                tg.showAlert("Davet linkiniz panoya kopyalandı!");
+            }).catch(() => {
+                tg.showAlert("Kopyalanamadı, lütfen elle kopyalayın.");
+            });
+        }
+
+        // Telegram'da Paylaşma Fonksiyonu
+        function shareRefLink() {
+            const refLink = document.getElementById('ref-link-input').value;
+            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent('VIP Hub platformuna katıl ve kazanmaya başla!')}`;
+            tg.openTelegramLink(shareUrl);
         }
 
         function showPage(pageId) {
