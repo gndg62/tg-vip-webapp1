@@ -2,339 +2,384 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP Hub & Wallet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VIP Hub Mini App</title>
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #0d0d0d;
-            --card-bg: #181818;
-            --border-color: #2a2a2a;
-            --text-color: #ffffff;
-            --text-muted: #888888;
-            --accent-color: #ffffff;
-            --btn-hover: #e0e0e0;
+            --bg: #0a0a0a;
+            --card: #141414;
+            --border: #262626;
+            --text: #ffffff;
+            --muted: #888888;
+            --accent: #ffffff;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             padding: 16px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            padding-bottom: 30px;
         }
 
+        /* Header */
         .header {
-            text-align: center;
-            padding: 12px 0 20px 0;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .header p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        /* Sekme Menüsü */
-        .tabs {
             display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            background: var(--card-bg);
-            padding: 4px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
         }
 
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
+        .header h2 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .user-tag {
+            font-size: 13px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: 20px;
+            color: #ccc;
+        }
+
+        /* Menü Sekmeleri */
+        .nav {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            background: var(--card);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 18px;
+        }
+
+        .nav-item {
             background: transparent;
             border: none;
-            color: var(--text-muted);
+            color: var(--muted);
+            padding: 10px 0;
+            font-size: 11px;
             font-weight: 600;
-            font-size: 13px;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
+            text-align: center;
         }
 
-        .tab-btn.active {
-            background: var(--accent-color);
-            color: #000;
+        .nav-item.active {
+            background: var(--accent);
+            color: #000000;
         }
 
-        /* Sekme İçerikleri */
-        .tab-content {
+        /* İçerik Ekranları */
+        .page {
             display: none;
             flex-direction: column;
-            gap: 16px;
+            gap: 14px;
         }
 
-        .tab-content.active {
+        .page.active {
             display: flex;
         }
 
         /* Kart Yapısı */
         .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background: var(--card);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 18px;
+            padding: 16px;
         }
 
         .card-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
         }
 
-        .balance-amount {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--text-color);
+        /* Dizin Liste Öğe */
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .balance-sub {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 4px;
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .item-sub {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .tag {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: #222;
+            border: 1px solid var(--border);
         }
 
         /* Form Elemanları */
-        .form-group {
+        .field {
             display: flex;
             flex-direction: column;
             gap: 6px;
             margin-bottom: 12px;
         }
 
-        .form-group label {
+        .field label {
             font-size: 12px;
-            color: var(--text-muted);
-            font-weight: 500;
+            color: var(--muted);
         }
 
-        .form-control {
-            background: #0d0d0d;
-            border: 1px solid var(--border-color);
+        .input {
+            background: #000000;
+            border: 1px solid var(--border);
             border-radius: 8px;
             padding: 12px;
-            color: #fff;
+            color: #ffffff;
             font-size: 14px;
             outline: none;
         }
 
-        .form-control:focus {
-            border-color: var(--accent-color);
-        }
-
-        select.form-control {
-            appearance: none;
+        .input:focus {
+            border-color: var(--accent);
         }
 
         .btn {
-            background: var(--accent-color);
+            background: var(--accent);
             color: #000000;
             border: none;
             border-radius: 8px;
             padding: 14px;
-            font-size: 14px;
             font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
             width: 100%;
-            margin-top: 8px;
-            transition: background 0.2s;
+            margin-top: 6px;
         }
 
         .btn:active {
-            background: var(--btn-hover);
+            opacity: 0.8;
         }
 
-        .notice {
-            font-size: 12px;
-            color: var(--text-muted);
+        .balance {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 4px 0;
+        }
+
+        .info-text {
+            font-size: 11px;
+            color: var(--muted);
             line-height: 1.4;
             text-align: center;
-            margin-top: 8px;
+            margin-top: 6px;
         }
     </style>
 </head>
 <body>
 
+    <!-- Header -->
     <div class="header">
-        <h1>VIP PLATFORM & CÜZDAN</h1>
-        <p id="user-info">Yükleniyor...</p>
+        <h2>VIP Platform Hub</h2>
+        <div class="user-tag" id="user-display">@kullanici</div>
     </div>
 
-    <!-- Sekmeler -->
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('wallet')">Cüzdan</button>
-        <button class="tab-btn" onclick="switchTab('payout')">Para Çek</button>
-        <button class="tab-btn" onclick="switchTab('application')">Başvuru Yap</button>
+    <!-- Menü -->
+    <div class="nav">
+        <button class="nav-item active" onclick="showPage('dizin')">Dizin</button>
+        <button class="nav-item" onclick="showPage('ai')">AI Asistan</button>
+        <button class="nav-item" onclick="showPage('cuzdan')">Cüzdan</button>
+        <button class="nav-item" onclick="showPage('basvuru')">Başvuru</button>
     </div>
 
-    <!-- 1. SEKME: CÜZDAN & BAKİYE -->
-    <div id="wallet-tab" class="tab-content active">
+    <!-- 1. EKRAN: DİZİN -->
+    <div id="page-dizin" class="page active">
         <div class="card">
-            <div class="card-title">Toplam Kazanç</div>
-            <div class="balance-amount">₺0.00</div>
-            <div class="balance-sub">Minimum çekim tutarı: 200 TL</div>
+            <div class="card-title">Aktif VIP Kanallar & İlanlar</div>
+            
+            <div class="item">
+                <div>
+                    <div class="item-title">VIP Kripto Sinyal</div>
+                    <div class="item-sub">Günlük analiz ve sinyaller</div>
+                </div>
+                <span class="tag">Kanal</span>
+            </div>
+
+            <div class="item">
+                <div>
+                    <div class="item-title">Otomatik Satış Botu</div>
+                    <div class="item-sub">Stok ve müşteri takibi</div>
+                </div>
+                <span class="tag">Yazılım</span>
+            </div>
+
+            <div class="item">
+                <div>
+                    <div class="item-title">Pazarlama Kulübü</div>
+                    <div class="item-sub">Büyüme stratejileri</div>
+                </div>
+                <span class="tag">Topluluk</span>
+            </div>
         </div>
+    </div>
 
+    <!-- 2. EKRAN: AI ASİSTAN -->
+    <div id="page-ai" class="page">
         <div class="card">
-            <div class="card-title">Referans Durumu</div>
-            <p style="font-size: 14px; color: #fff;">Davet Linkinle Kaydolanlar: <b>0 Kişi</b></p>
-            <p class="notice" style="text-align: left; margin-top: 8px;">
-                Davet linkinizi almak için Telegram sohbetinde <b>/start</b> komutunu gönderebilirsiniz.
+            <div class="card-title">Yapay Zeka Satış Asistanı</div>
+            <p style="font-size: 13px; color: #ccc; line-height: 1.5; margin-bottom: 12px;">
+                Bota doğrudan ürün fotoğrafı veya açıklama göndererek otomatik fiyat analizi ve ikna edici satış metni alabilirsiniz.
             </p>
+            <div style="background: #000; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; color: var(--muted);">
+                💡 <b>İpucu:</b> Sohbet ekranından bota herhangi bir görsel gönderip anında test edebilirsiniz.
+            </div>
         </div>
     </div>
 
-    <!-- 2. SEKME: PARA ÇEKME TALEBİ -->
-    <div id="payout-tab" class="tab-content">
+    <!-- 3. EKRAN: CÜZDAN & PARA ÇEKME -->
+    <div id="page-cuzdan" class="page">
         <div class="card">
-            <div class="card-title">Para Çekim Formu</div>
-            <div class="form-group">
+            <div class="card-title">Mevcut Bakiye</div>
+            <div class="balance">₺0.00</div>
+            <p style="font-size: 11px; color: var(--muted);">Minimum çekim alt limiti: 200.00 TL</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Nakit Çekim Talebi</div>
+            <div class="field">
                 <label>Çekilecek Tutar (TL)</label>
-                <input type="number" id="payout-amount" class="form-control" placeholder="Örn: 250" min="200">
+                <input type="number" id="payout-amount" class="input" placeholder="Min 200" min="200">
             </div>
-            <div class="form-group">
+            <div class="field">
                 <label>Ad Soyad</label>
-                <input type="text" id="payout-holder" class="form-control" placeholder="Ad Soyad">
+                <input type="text" id="payout-holder" class="input" placeholder="Hesap Sahibi">
             </div>
-            <div class="form-group">
+            <div class="field">
                 <label>IBAN Adresi</label>
-                <input type="text" id="payout-iban" class="form-control" placeholder="TR00 0000 0000 0000 0000 0000 00">
+                <input type="text" id="payout-iban" class="input" placeholder="TR00 0000 0000 0000 0000 0000 00">
             </div>
-            <button class="btn" onclick="submitPayout()">Çekim Talebi Gönder</button>
-            <div class="notice">Talebiniz kontrol edilip onaylandıktan sonra hesabınıza aktarılacaktır.</div>
+            <button class="btn" onclick="sendPayout()">Talebi Gönder</button>
+            <div class="info-text">Talep onaylandıktan sonra bakiyenizden düşülerek hesabınıza aktarılır.</div>
         </div>
     </div>
 
-    <!-- 3. SEKME: İLAN / BAŞVURU YAP -->
-    <div id="application-tab" class="tab-content">
+    <!-- 4. EKRAN: BAŞVURU -->
+    <div id="page-basvuru" class="page">
         <div class="card">
             <div class="card-title">Yeni İlan / Kanal Başvurusu</div>
-            <div class="form-group">
-                <label>Başlık / Kanal Adı</label>
-                <input type="text" id="app-title" class="form-control" placeholder="Örn: VIP Kripto Sinyal">
+            <div class="field">
+                <label>İlan / Kanal Adı</label>
+                <input type="text" id="app-title" class="input" placeholder="Örn: VIP Finans Grubu">
             </div>
-            <div class="form-group">
-                <label>İlan Türü</label>
-                <select id="app-type" class="form-control">
+            <div class="field">
+                <label>Kategori</label>
+                <select id="app-type" class="input">
                     <option value="VIP Kanal">VIP Kanal</option>
                     <option value="Sponsorlu İlan">Sponsorlu İlan</option>
                     <option value="Ürün / Hizmet">Ürün / Hizmet</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label>Bağlantı / Link</label>
-                <input type="text" id="app-link" class="form-control" placeholder="https://t.me/...">
+            <div class="field">
+                <label>Bağlantı (Link)</label>
+                <input type="text" id="app-link" class="input" placeholder="https://t.me/...">
             </div>
-            <button class="btn" onclick="submitApplication()">Başvuruyu İlet</button>
+            <button class="btn" onclick="sendApplication()">Başvuruyu İlet</button>
         </div>
     </div>
 
     <script>
-        // Telegram WebApp Bağlantısı
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
 
-        // Kullanıcı Bilgisini Çekme
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const user = tg.initDataUnsafe.user;
-            document.getElementById('user-info').innerText = `@${user.username || user.first_name}`;
-        } else {
-            document.getElementById('user-info').innerText = "Konuk Kullanıcı";
+            const u = tg.initDataUnsafe.user;
+            document.getElementById('user-display').innerText = `@${u.username || u.first_name}`;
         }
 
-        // Sekme Değiştirme Fonksiyonu
-        function switchTab(tabName) {
-            const tabs = document.querySelectorAll('.tab-btn');
-            const contents = document.querySelectorAll('.tab-content');
-
-            tabs.forEach(tab => tab.classList.remove('active'));
-            contents.forEach(content => content.classList.remove('active'));
-
-            if (tabName === 'wallet') {
-                tabs[0].classList.add('active');
-                document.getElementById('wallet-tab').classList.add('active');
-            } else if (tabName === 'payout') {
-                tabs[1].classList.add('active');
-                document.getElementById('payout-tab').classList.add('active');
-            } else if (tabName === 'application') {
-                tabs[2].classList.add('active');
-                document.getElementById('application-tab').classList.add('active');
-            }
+        function showPage(pageId) {
+            const pages = ['dizin', 'ai', 'cuzdan', 'basvuru'];
+            const btns = document.querySelectorAll('.nav-item');
+            
+            pages.forEach((p, idx) => {
+                const el = document.getElementById(`page-${p}`);
+                if (p === pageId) {
+                    el.classList.add('active');
+                    btns[idx].classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                    btns[idx].classList.remove('active');
+                }
+            });
         }
 
-        // Para Çekim Talebini Bota İletme
-        function submitPayout() {
+        function sendPayout() {
             const amount = document.getElementById('payout-amount').value;
             const holder = document.getElementById('payout-holder').value;
             const iban = document.getElementById('payout-iban').value;
 
             if (!amount || !holder || !iban) {
-                tg.showAlert("Lütfen tüm alanları eksiksiz doldurun!");
+                tg.showAlert("Tüm alanları doldurmalısınız.");
                 return;
             }
-
             if (parseFloat(amount) < 200) {
-                tg.showAlert("Minimum çekim tutarı 200 TL'dir.");
+                tg.showAlert("Minimum çekim 200 TL'dir.");
                 return;
             }
 
-            const data = {
+            tg.sendData(JSON.stringify({
                 action: "payout_request",
                 amount: amount,
                 holder: holder,
                 iban: iban
-            };
-
-            tg.sendData(JSON.stringify(data));
+            }));
         }
 
-        // Başvuruyu Bota İletme
-        function submitApplication() {
+        function sendApplication() {
             const title = document.getElementById('app-title').value;
             const type = document.getElementById('app-type').value;
             const link = document.getElementById('app-link').value;
 
             if (!title || !link) {
-                tg.showAlert("Lütfen başlık ve link alanlarını doldurun!");
+                tg.showAlert("Başlık ve link alanları zorunludur.");
                 return;
             }
 
-            const data = {
+            tg.sendData(JSON.stringify({
                 action: "submit_app",
                 title: title,
                 type: type,
                 link: link
-            };
-
-            tg.sendData(JSON.stringify(data));
+            }));
         }
     </script>
 </body>
