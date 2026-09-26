@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Hub & Wallet</title>
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --card-bg: #181818;
+            --border-color: #2a2a2a;
+            --text-color: #ffffff;
+            --text-muted: #888888;
+            --accent-color: #ffffff;
+            --btn-hover: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            padding: 12px 0 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Sekme Menüsü */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-color);
+            color: #000;
+        }
+
+        /* Sekme İçerikleri */
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Kart Yapısı */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .card-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .balance-amount {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-color);
+        }
+
+        .balance-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Form Elemanları */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-control {
+            background: #0d0d0d;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-color);
+        }
+
+        select.form-control {
+            appearance: none;
+        }
+
+        .btn {
+            background: var(--accent-color);
+            color: #000000;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn:active {
+            background: var(--btn-hover);
+        }
+
+        .notice {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.4;
+            text-align: center;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>VIP PLATFORM & CÜZDAN</h1>
+        <p id="user-info">Yükleniyor...</p>
+    </div>
+
+    <!-- Sekmeler -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('wallet')">Cüzdan</button>
+        <button class="tab-btn" onclick="switchTab('payout')">Para Çek</button>
+        <button class="tab-btn" onclick="switchTab('application')">Başvuru Yap</button>
+    </div>
+
+    <!-- 1. SEKME: CÜZDAN & BAKİYE -->
+    <div id="wallet-tab" class="tab-content active">
+        <div class="card">
+            <div class="card-title">Toplam Kazanç</div>
+            <div class="balance-amount">₺0.00</div>
+            <div class="balance-sub">Minimum çekim tutarı: 200 TL</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Referans Durumu</div>
+            <p style="font-size: 14px; color: #fff;">Davet Linkinle Kaydolanlar: <b>0 Kişi</b></p>
+            <p class="notice" style="text-align: left; margin-top: 8px;">
+                Davet linkinizi almak için Telegram sohbetinde <b>/start</b> komutunu gönderebilirsiniz.
+            </p>
+        </div>
+    </div>
+
+    <!-- 2. SEKME: PARA ÇEKME TALEBİ -->
+    <div id="payout-tab" class="tab-content">
+        <div class="card">
+            <div class="card-title">Para Çekim Formu</div>
+            <div class="form-group">
+                <label>Çekilecek Tutar (TL)</label>
+                <input type="number" id="payout-amount" class="form-control" placeholder="Örn: 250" min="200">
+            </div>
+            <div class="form-group">
+                <label>Ad Soyad</label>
+                <input type="text" id="payout-holder" class="form-control" placeholder="Ad Soyad">
+            </div>
+            <div class="form-group">
+                <label>IBAN Adresi</label>
+                <input type="text" id="payout-iban" class="form-control" placeholder="TR00 0000 0000 0000 0000 0000 00">
+            </div>
+            <button class="btn" onclick="submitPayout()">Çekim Talebi Gönder</button>
+            <div class="notice">Talebiniz kontrol edilip onaylandıktan sonra hesabınıza aktarılacaktır.</div>
+        </div>
+    </div>
+
+    <!-- 3. SEKME: İLAN / BAŞVURU YAP -->
+    <div id="application-tab" class="tab-content">
+        <div class="card">
+            <div class="card-title">Yeni İlan / Kanal Başvurusu</div>
+            <div class="form-group">
+                <label>Başlık / Kanal Adı</label>
+                <input type="text" id="app-title" class="form-control" placeholder="Örn: VIP Kripto Sinyal">
+            </div>
+            <div class="form-group">
+                <label>İlan Türü</label>
+                <select id="app-type" class="form-control">
+                    <option value="VIP Kanal">VIP Kanal</option>
+                    <option value="Sponsorlu İlan">Sponsorlu İlan</option>
+                    <option value="Ürün / Hizmet">Ürün / Hizmet</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Bağlantı / Link</label>
+                <input type="text" id="app-link" class="form-control" placeholder="https://t.me/...">
+            </div>
+            <button class="btn" onclick="submitApplication()">Başvuruyu İlet</button>
+        </div>
+    </div>
+
+    <script>
+        // Telegram WebApp Bağlantısı
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // Kullanıcı Bilgisini Çekme
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            document.getElementById('user-info').innerText = `@${user.username || user.first_name}`;
+        } else {
+            document.getElementById('user-info').innerText = "Konuk Kullanıcı";
+        }
+
+        // Sekme Değiştirme Fonksiyonu
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+
+            if (tabName === 'wallet') {
+                tabs[0].classList.add('active');
+                document.getElementById('wallet-tab').classList.add('active');
+            } else if (tabName === 'payout') {
+                tabs[1].classList.add('active');
+                document.getElementById('payout-tab').classList.add('active');
+            } else if (tabName === 'application') {
+                tabs[2].classList.add('active');
+                document.getElementById('application-tab').classList.add('active');
+            }
+        }
+
+        // Para Çekim Talebini Bota İletme
+        function submitPayout() {
+            const amount = document.getElementById('payout-amount').value;
+            const holder = document.getElementById('payout-holder').value;
+            const iban = document.getElementById('payout-iban').value;
+
+            if (!amount || !holder || !iban) {
+                tg.showAlert("Lütfen tüm alanları eksiksiz doldurun!");
+                return;
+            }
+
+            if (parseFloat(amount) < 200) {
+                tg.showAlert("Minimum çekim tutarı 200 TL'dir.");
+                return;
+            }
+
+            const data = {
+                action: "payout_request",
+                amount: amount,
+                holder: holder,
+                iban: iban
+            };
+
+            tg.sendData(JSON.stringify(data));
+        }
+
+        // Başvuruyu Bota İletme
+        function submitApplication() {
+            const title = document.getElementById('app-title').value;
+            const type = document.getElementById('app-type').value;
+            const link = document.getElementById('app-link').value;
+
+            if (!title || !link) {
+                tg.showAlert("Lütfen başlık ve link alanlarını doldurun!");
+                return;
+            }
+
+            const data = {
+                action: "submit_app",
+                title: title,
+                type: type,
+                link: link
+            };
+
+            tg.sendData(JSON.stringify(data));
+        }
+    </script>
+</body>
+</html>
