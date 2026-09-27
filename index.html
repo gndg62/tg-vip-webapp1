@@ -2,612 +2,447 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- 1. PLATFORM BAŞLIĞI (İstediğin ismi yazabilirsin) -->
-    <title>ScannerOfChannel</title>
-    
-    <!-- Telegram Web App SDK -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChannelScanner</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg: #0a0a0a;
-            --card: #141414;
-            --border: #262626;
-            --text: #ffffff;
-            --muted: #888888;
-            --accent: #ffffff;
-            --green: #22c55e;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #22c55e;
+            --accent-hover: #16a34a;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --warning-color: #f59e0b;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            padding: 16px;
-            padding-bottom: 30px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 75px;
         }
 
-        /* Header */
         .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-bottom: 14px;
-            border-bottom: 1px solid var(--border);
+            background-color: var(--card-bg);
+            padding: 18px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-color);
+            letter-spacing: 0.5px;
+        }
+
+        .container {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
             margin-bottom: 16px;
         }
 
-        .header h2 {
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .user-tag {
-            font-size: 13px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            padding: 4px 10px;
-            border-radius: 20px;
-            color: #ccc;
-        }
-
-        /* Menü Sekmeleri */
-        .nav {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            background: var(--card);
-            padding: 4px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            margin-bottom: 18px;
-        }
-
-        .nav-item {
-            background: transparent;
-            border: none;
-            color: var(--muted);
-            padding: 10px 0;
-            font-size: 11px;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-
-        .nav-item.active {
-            background: var(--accent);
-            color: #000000;
-        }
-
-        /* Kategori Filtre Butonları */
-        .category-scroll {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            margin-bottom: 14px;
-            scrollbar-width: none;
-        }
-
-        .category-scroll::-webkit-scrollbar {
-            display: none;
-        }
-
-        .cat-btn {
-            background: #181818;
-            border: 1px solid var(--border);
-            color: var(--muted);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-
-        .cat-btn.active {
-            background: #ffffff;
-            color: #000000;
-            border-color: #ffffff;
-        }
-
-        /* İçerik Ekranları */
-        .page {
-            display: none;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .page.active {
-            display: flex;
-        }
-
-        /* Kart Yapısı */
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-        }
-
         .card-title {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-bottom: 10px;
-        }
-
-        /* Dizin Tıklanabilir Kanal Kartı */
-        .channel-card {
-            background: #101010;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: transform 0.1s, border-color 0.2s;
-        }
-
-        .channel-card:active {
-            transform: scale(0.98);
-            border-color: var(--muted);
-        }
-
-        .channel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 6px;
-        }
-
-        .channel-title {
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .channel-sub {
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.4;
-        }
-
-        .comm-badge {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--green);
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            padding: 4px 8px;
-            border-radius: 6px;
-            white-space: nowrap;
-        }
-
-        .channel-footer {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px dashed var(--border);
-            font-size: 11px;
-            color: var(--muted);
         }
 
-        /* Form Elemanları */
-        .field {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 12px;
-        }
-
-        .field label {
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        .input {
-            background: #000000;
-            border: 1px solid var(--border);
+        .balance-box {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--card-bg);
             border-radius: 8px;
-            padding: 12px;
-            color: #ffffff;
-            font-size: 13px;
-            outline: none;
-            width: 100%;
+            border: 1px solid var(--accent-color);
+            margin-bottom: 16px;
         }
 
-        .input:focus {
-            border-color: var(--accent);
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 8px;
+        .balance-amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin: 6px 0;
         }
 
         .btn {
-            background: var(--accent);
-            color: #000000;
+            width: 100%;
+            padding: 11px;
+            background-color: var(--accent-color);
+            color: #0f172a;
+            font-weight: 600;
             border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-weight: 700;
-            font-size: 13px;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            width: auto;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
             width: 100%;
+            padding: 10px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-color);
+            font-size: 14px;
         }
 
-        .btn-outline {
-            background: transparent;
-            color: #ffffff;
-            border: 1px solid var(--border);
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
         }
 
-        .btn:active {
-            opacity: 0.8;
-        }
-
-        .balance {
-            font-size: 32px;
-            font-weight: 800;
-            margin: 4px 0;
-        }
-
-        .info-text {
-            font-size: 11px;
-            color: var(--muted);
-            line-height: 1.4;
-            text-align: center;
-            margin-top: 6px;
-        }
-
-        /* Modal (Kanal Detay Penceresi) */
-        .modal {
-            display: none;
+        .nav-tabs {
+            display: flex;
+            justify-content: space-around;
+            background-color: var(--card-bg);
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85);
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            z-index: 999;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 1px solid var(--border-color);
+            z-index: 1000;
         }
 
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: #181818;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 20px;
-            width: 100%;
-            max-width: 360px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .empty-box {
+        .tab-btn {
+            flex: 1;
+            padding: 14px 8px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
             text-align: center;
-            padding: 30px 10px;
-            color: var(--muted);
-            font-size: 13px;
+            transition: color 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-color);
+            font-weight: 700;
+            border-top: 2px solid var(--accent-color);
+        }
+
+        .alert {
+            padding: 12px;
+            background-color: rgba(51, 65, 85, 0.5);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 14px;
             line-height: 1.5;
+        }
+
+        .channel-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .channel-item:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
     <div class="header">
-        <!-- 2. PLATFORM ADI (Buradan değiştirebilirsin) -->
-        <h2>ScannerOfChannel</h2>
-        <div class="user-tag" id="user-display">@kullanici</div>
+        <h1>ChannelScanner</h1>
     </div>
 
-    <!-- Menü -->
-    <div class="nav">
-        <button class="nav-item active" onclick="showPage('dizin')">Dizin</button>
-        <button class="nav-item" onclick="showPage('ai')">AI Asistan</button>
-        <button class="nav-item" onclick="showPage('cuzdan')">Cüzdan</button>
-        <button class="nav-item" onclick="showPage('basvuru')">Başvuru</button>
+    <div class="container">
+
+        <!-- 1. DIZIN VE ARAMA -->
+        <div id="tab-directory" class="tab-content active">
+            <div class="card">
+                <div class="card-title">Kanal ve Ürün Arama</div>
+                <div class="form-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Aramak istediğiniz kanal veya kategoriyi yazın..." onkeyup="filterChannels()">
+                </div>
+                <div id="channelList">
+                    <div class="channel-item">
+                        <div>
+                            <strong style="font-size: 14px;">Kripto Analiz VIP</strong>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Kategori: Finans</div>
+                        </div>
+                        <button class="btn btn-sm" onclick="copyRef('kripto_vip')">Referans Linki</button>
+                    </div>
+                    <div class="channel-item">
+                        <div>
+                            <strong style="font-size: 14px;">E-Ticaret ve İthalat</strong>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Kategori: Ticaret</div>
+                        </div>
+                        <button class="btn btn-sm" onclick="copyRef('eticaret_grubu')">Referans Linki</button>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 12px;">* Gizlilik ve güvenlik gereği fiyatlar doğrudan listelenmemektedir.</div>
+            </div>
+        </div>
+
+        <!-- 2. AI ASİSTAN -->
+        <div id="tab-ai" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span>Yapay Zeka Asistanı</span>
+                    <span id="aiLimitBadge" style="font-size: 11px; color: var(--text-muted);">Günlük Hak: 15/15</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>Kullanıcı Türü</label>
+                    <select id="userRole" class="form-control">
+                        <option value="user">Standart Kullanıcı</option>
+                        <option value="owner">Kanal Sahibi (Pazar Analizi ve Metin Üretimi)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Soru veya Ürün Detayı</label>
+                    <input type="text" id="aiQuery" class="form-control" placeholder="Analiz edilecek içeriği girin...">
+                </div>
+
+                <button class="btn" onclick="askAi()">Analiz Et</button>
+
+                <div id="aiResponse" style="display:none; margin-top: 14px; padding: 12px; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; line-height: 1.5;"></div>
+            </div>
+        </div>
+
+        <!-- 3. CÜZDAN VE BAKIYE -->
+        <div id="tab-wallet" class="tab-content">
+            <div class="balance-box">
+                <div style="font-size: 12px; color: var(--text-muted);">Çekilebilir Bakiye</div>
+                <div class="balance-amount" id="userBalance">0.00 TL</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Ödeme Talebi</div>
+                <div class="alert">
+                    Kesinti Oranları:<br>
+                    • 1000 TL ve altı çekimlerde: %5 komisyon<br>
+                    • 1000 TL üzeri çekimlerde: %2.5 komisyon
+                </div>
+
+                <form onsubmit="handlePayout(event)">
+                    <div class="form-group">
+                        <label>Tutar (TL)</label>
+                        <input type="number" id="payoutAmount" class="form-control" placeholder="Çekim tutarı girin" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Hesap Sahibi Ad Soyad</label>
+                        <input type="text" id="payoutHolder" class="form-control" placeholder="Ad Soyad" required>
+                    </div>
+                    <div class="form-group">
+                        <label>IBAN Numarası</label>
+                        <input type="text" id="payoutIban" class="form-control" placeholder="TR..." required>
+                    </div>
+                    <button type="submit" class="btn">Talep Gönder</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 4. KANAL EKLEME -->
+        <div id="tab-submit" class="tab-content">
+            <div class="card">
+                <div class="card-title">Kanal Ekleme Formu</div>
+                <form onsubmit="handleChannelSubmit(event)">
+                    <div class="form-group">
+                        <label>Kanal Adı</label>
+                        <input type="text" id="chanTitle" class="form-control" placeholder="Kanal adı" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Erişim Türü</label>
+                        <select id="chanMode" class="form-control" onchange="toggleChanMode()">
+                            <option value="paid">Ücretli Üyelik</option>
+                            <option value="free">Ücretsiz Üyelik</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="groupPaidFee">
+                        <label>Aylık Ücret (TL)</label>
+                        <input type="number" id="chanPrice" class="form-control" placeholder="Ücret tutarı">
+                    </div>
+                    <div class="form-group">
+                        <label>Referans Komisyonu / Şartı</label>
+                        <input type="text" id="chanComm" class="form-control" placeholder="Örn: %20 veya Üye başı 5 TL" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Kanal Bağlantısı</label>
+                        <input type="text" id="chanLink" class="form-control" placeholder="https://t.me/kanaliniz" required>
+                    </div>
+                    <button type="submit" class="btn">Başvuruyu İlet</button>
+                </form>
+            </div>
+        </div>
+
     </div>
 
-    <!-- 1. EKRAN: DİZİN -->
-    <div id="page-dizin" class="page active">
-        
-        <!-- Kategori Filtreleri -->
-        <div class="category-scroll">
-            <button class="cat-btn active" onclick="filterCat('all', this)">Tümü</button>
-            <button class="cat-btn" onclick="filterCat('kripto', this)">Kripto & Finans</button>
-            <button class="cat-btn" onclick="filterCat('yazilim', this)">Yazılım & Bot</button>
-            <button class="cat-btn" onclick="filterCat('eticaret', this)">E-Ticaret</button>
-            <button class="cat-btn" onclick="filterCat('pazarlama', this)">Pazarlama</button>
-        </div>
-
-        <div class="card">
-            <div class="card-title">VIP Kanallar & İlanlar</div>
-            
-            <div id="channel-list">
-                <!-- Kanallar buraya eklenecek -->
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. EKRAN: AI ASİSTAN -->
-    <div id="page-ai" class="page">
-        <div class="card">
-            <div class="card-title">Yapay Zeka Satış Asistanı</div>
-            <p style="font-size: 13px; color: #ccc; line-height: 1.5; margin-bottom: 12px;">
-                Bota doğrudan ürün fotoğrafı veya açıklama göndererek otomatik fiyat analizi ve ikna edici satış metni alabilirsiniz.
-            </p>
-            <div style="background: #000; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; color: var(--muted);">
-                💡 <b>İpucu:</b> Sohbet ekranından bota herhangi bir görsel gönderip anında test edebilirsiniz.
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. EKRAN: CÜZDAN & PARA ÇEKME -->
-    <div id="page-cuzdan" class="page">
-        <div class="card">
-            <div class="card-title">Kanal Komisyon Kazançları</div>
-            <div class="balance">₺0.00</div>
-            <p style="font-size: 11px; color: var(--muted);">Kanal yönlendirmelerinden kazandığınız toplam bakiye.</p>
-        </div>
-
-        <div class="card">
-            <div class="card-title">Nakit Çekim Talebi</div>
-            <div class="field">
-                <label>Çekilecek Tutar (TL)</label>
-                <input type="number" id="payout-amount" class="input" placeholder="Min 200" min="200">
-            </div>
-            <div class="field">
-                <label>Ad Soyad</label>
-                <input type="text" id="payout-holder" class="input" placeholder="Hesap Sahibi">
-            </div>
-            <div class="field">
-                <label>IBAN Adresi</label>
-                <input type="text" id="payout-iban" class="input" placeholder="TR00 0000 0000 0000 0000 0000 00">
-            </div>
-            <button class="btn" onclick="sendPayout()">Talebi Gönder</button>
-            <div class="info-text">Çekim talebiniz onaylandıktan sonra belirttiğiniz IBAN adresine gönderilir.</div>
-        </div>
-    </div>
-
-    <!-- 4. EKRAN: BAŞVURU -->
-    <div id="page-basvuru" class="page">
-        <div class="card">
-            <div class="card-title">Yeni İlan / Kanal Başvurusu</div>
-            <div class="field">
-                <label>İlan / Kanal Adı</label>
-                <input type="text" id="app-title" class="input" placeholder="Örn: VIP Finans Grubu">
-            </div>
-            <div class="field">
-                <label>Kategori</label>
-                <select id="app-type" class="input">
-                    <option value="kripto">Kripto & Finans</option>
-                    <option value="yazilim">Yazılım & Bot</option>
-                    <option value="eticaret">E-Ticaret</option>
-                    <option value="pazarlama">Pazarlama</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>Bağlantı (Link)</label>
-                <input type="text" id="app-link" class="input" placeholder="https://t.me/...">
-            </div>
-            <div class="field">
-                <label>Getirene Verilecek Komisyon Oranı (%)</label>
-                <input type="number" id="app-comm" class="input" placeholder="Örn: 20" min="0" max="100">
-            </div>
-            <button class="btn" onclick="sendApplication()">Başvuruyu İlet</button>
-            <div class="info-text">Başvurunuz onaylandıktan sonra Dizin sekmesinde komisyon oranınızla yayınlanacaktır.</div>
-        </div>
-    </div>
-
-    <!-- KANAL DETAY MODALI -->
-    <div id="channel-modal" class="modal">
-        <div class="modal-content">
-            <h3 id="m-title" style="font-size: 16px;">Kanal Adı</h3>
-            <p id="m-desc" style="font-size: 13px; color: var(--muted); line-height: 1.4;">Açıklama</p>
-            
-            <div style="background: #101010; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; display: flex; justify-content: space-between;">
-                <span>Kazanılacak Komisyon:</span>
-                <b id="m-comm" style="color: var(--green);">%0</b>
-            </div>
-
-            <div class="field">
-                <label>Sana Özel Davet Linkin:</label>
-                <input type="text" id="m-ref-link" class="input" readonly>
-            </div>
-
-            <div class="btn-group">
-                <button class="btn" onclick="copyRefLink()">Link Kopyala</button>
-                <button class="btn btn-outline" id="m-join-btn" onclick="openChannelLink()">Kanala Git</button>
-            </div>
-            <button class="btn btn-outline" style="border:none; color: var(--muted); margin-top:-6px;" onclick="closeModal()">Kapat</button>
-        </div>
+    <!-- ALT SEKMELER -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('directory', this)">Dizin</button>
+        <button class="tab-btn" onclick="switchTab('ai', this)">Yapay Zeka</button>
+        <button class="tab-btn" onclick="switchTab('wallet', this)">Cüzdan</button>
+        <button class="tab-btn" onclick="switchTab('submit', this)">Kanal Ekle</button>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+        let tg = window.Telegram ? window.Telegram.WebApp : null;
+        if(tg) tg.expand();
 
-        // BOT KULLANICI ADINIZ (BotFather'dan aldığınız nick)
-        const BOT_USERNAME = "VIPHubBot"; 
+        let currentBalance = 0.00;
+        let dailyAiQuestions = 0;
 
-        let userId = "0000";
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            userId = tg.initDataUnsafe.user.id;
-            document.getElementById('user-display').innerText = `@${tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name}`;
-        }
-
-        /* 
-           ===============================================================
-           GERÇEK KANALLARI BURAYA EKLEYEBİLİRSİNİZ.
-           Şu an dizi BOŞTUR. Kanal eklendikçe aşağıdaki formatta yazabilirsiniz:
-           
-           { 
-               id: "kanal_1", 
-               cat: "kripto", 
-               title: "Kanal Adı", 
-               desc: "Açıklama", 
-               comm: 20, 
-               link: "https://t.me/kanal_linki" 
-           }
-           ===============================================================
-        */
-        const channelsData = [];
-
-        let activeChannel = null;
-
-        // Kanalları Ekrana Basma Fonksiyonu
-        function renderChannels(category = 'all') {
-            const container = document.getElementById('channel-list');
-            container.innerHTML = "";
-
-            const filtered = category === 'all' ? channelsData : channelsData.filter(c => c.cat === category);
-
-            // Kanal yoksa gösterilecek boş ekran uyarısı
-            if(filtered.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-box">
-                        <p><b>Henüz onaylanmış bir kanal yok.</b></p>
-                        <p style="margin-top:6px; font-size:11px;">Kendi kanalınızı ekleyip komisyon tanımlamak için <b>Başvuru</b> sekmesini kullanabilirsiniz.</p>
-                    </div>`;
-                return;
-            }
-
-            filtered.forEach(c => {
-                const el = document.createElement('div');
-                el.className = 'channel-card';
-                el.onclick = () => openModal(c);
-                el.innerHTML = `
-                    <div class="channel-header">
-                        <div class="channel-title">${c.title}</div>
-                        <span class="comm-badge">%${c.comm} Komisyon</span>
-                    </div>
-                    <div class="channel-sub">${c.desc}</div>
-                    <div class="channel-footer">
-                        <span>Kategori: ${c.cat.toUpperCase()}</span>
-                        <span style="color: #fff; font-weight:600;">İncele & Link Al ➔</span>
-                    </div>
-                `;
-                container.appendChild(el);
-            });
-        }
-
-        function filterCat(cat, btn) {
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        function switchTab(tab, btn) {
+            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
             btn.classList.add('active');
-            renderChannels(cat);
         }
 
-        function openModal(channel) {
-            activeChannel = channel;
-            document.getElementById('m-title').innerText = channel.title;
-            document.getElementById('m-desc').innerText = channel.desc;
-            document.getElementById('m-comm').innerText = `%${channel.comm}`;
-            
-            const refLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}_${channel.id}`;
-            document.getElementById('m-ref-link').value = refLink;
-
-            document.getElementById('channel-modal').classList.add('active');
+        function toggleChanMode() {
+            let mode = document.getElementById('chanMode').value;
+            document.getElementById('groupPaidFee').style.display = mode === 'paid' ? 'block' : 'none';
         }
 
-        function closeModal() {
-            document.getElementById('channel-modal').classList.remove('active');
-        }
+        function askAi() {
+            let role = document.getElementById('userRole').value;
+            let query = document.getElementById('aiQuery').value;
+            let resBox = document.getElementById('aiResponse');
 
-        function copyRefLink() {
-            const input = document.getElementById('m-ref-link');
-            input.select();
-            navigator.clipboard.writeText(input.value).then(() => {
-                tg.showAlert("Özel davet linkiniz kopyalandı!");
-            });
-        }
-
-        function openChannelLink() {
-            if (activeChannel && activeChannel.link) {
-                tg.openTelegramLink(activeChannel.link);
+            if(!query) {
+                alert("Lütfen bir içerik veya soru girin.");
+                return;
             }
-        }
 
-        function showPage(pageId) {
-            const pages = ['dizin', 'ai', 'cuzdan', 'basvuru'];
-            const btns = document.querySelectorAll('.nav-item');
-            
-            pages.forEach((p, idx) => {
-                const el = document.getElementById(`page-${p}`);
-                if (p === pageId) {
-                    el.classList.add('active');
-                    btns[idx].classList.add('active');
-                } else {
-                    el.classList.remove('active');
-                    btns[idx].classList.remove('active');
+            if(role === 'user') {
+                if(dailyAiQuestions >= 15) {
+                    alert("Günlük 15 soru sınırına ulaştınız.");
+                    return;
                 }
+                dailyAiQuestions++;
+                document.getElementById('aiLimitBadge').innerText = `Günlük Hak: ${15 - dailyAiQuestions}/15`;
+            }
+
+            resBox.style.display = 'block';
+            resBox.innerHTML = "Analiz yapılıyor...";
+
+            setTimeout(() => {
+                if(role === 'owner') {
+                    resBox.innerHTML = `<strong>Pazar Analizi:</strong><br>İçeriğiniz sistemdeki diğer kanallarla karşılaştırıldı.<br><br><strong>Önerilen Tanıtım Metni:</strong><br>${query} için optimize edilmiş pazarlama mesajı oluşturuldu.`;
+                } else {
+                    resBox.innerHTML = `<strong>Yapay Zeka Yanıtı:</strong><br>"${query}" talebiniz incelendi. İlgili kategoriler üzerinden işlem yapabilirsiniz.`;
+                }
+            }, 800);
+        }
+
+        function handlePayout(e) {
+            e.preventDefault();
+            let amount = parseFloat(document.getElementById('payoutAmount').value);
+            let holder = document.getElementById('payoutHolder').value;
+            let iban = document.getElementById('payoutIban').value;
+
+            if(amount > currentBalance) {
+                alert(`Yetersiz bakiye. Mevcut bakiyeniz: ${currentBalance} TL`);
+                return;
+            }
+
+            let feePercent = amount <= 1000 ? 0.05 : 0.025;
+            let feeAmount = amount * feePercent;
+            let netAmount = amount - feeAmount;
+
+            if(tg) {
+                tg.sendData(JSON.stringify({
+                    action: "payout_request",
+                    gross_amount: amount,
+                    fee_amount: feeAmount,
+                    net_amount: netAmount,
+                    fee_rate: feePercent * 100,
+                    holder: holder,
+                    iban: iban
+                }));
+                alert(`Çekim talebi oluşturuldu.\nNet Ödenecek: ${netAmount.toFixed(2)} TL`);
+            }
+        }
+
+        function handleChannelSubmit(e) {
+            e.preventDefault();
+            if(tg) {
+                tg.sendData(JSON.stringify({
+                    action: "submit_app",
+                    title: document.getElementById('chanTitle').value,
+                    mode: document.getElementById('chanMode').value,
+                    price: document.getElementById('chanPrice').value || 0,
+                    commission: document.getElementById('chanComm').value,
+                    link: document.getElementById('chanLink').value
+                }));
+                alert("Kanal başvurusu gönderildi.");
+            }
+        }
+
+        function copyRef(id) {
+            let uid = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "12345";
+            let link = `https://t.me/ChannelScannerBot?start=ref_${uid}_${id}`;
+            navigator.clipboard.writeText(link);
+            alert("Referans linkiniz kopyalandı:\n" + link);
+        }
+
+        function filterChannels() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let items = document.querySelectorAll('.channel-item');
+            items.forEach(item => {
+                let text = item.innerText.toLowerCase();
+                item.style.display = text.includes(input) ? 'flex' : 'none';
             });
         }
-
-        function sendPayout() {
-            const amount = document.getElementById('payout-amount').value;
-            const holder = document.getElementById('payout-holder').value;
-            const iban = document.getElementById('payout-iban').value;
-
-            if (!amount || !holder || !iban) {
-                tg.showAlert("Tüm alanları doldurmalısınız.");
-                return;
-            }
-            if (parseFloat(amount) < 200) {
-                tg.showAlert("Minimum çekim 200 TL'dir.");
-                return;
-            }
-
-            tg.sendData(JSON.stringify({
-                action: "payout_request",
-                amount: amount,
-                holder: holder,
-                iban: iban
-            }));
-        }
-
-        function sendApplication() {
-            const title = document.getElementById('app-title').value;
-            const type = document.getElementById('app-type').value;
-            const link = document.getElementById('app-link').value;
-            const comm = document.getElementById('app-comm').value || "0";
-
-            if (!title || !link) {
-                tg.showAlert("Başlık ve link alanları zorunludur.");
-                return;
-            }
-
-            tg.sendData(JSON.stringify({
-                action: "submit_app",
-                title: title,
-                type: type,
-                link: link,
-                commission: comm
-            }));
-        }
-
-        // Sayfa açıldığında dizini yükle
-        renderChannels('all');
     </script>
 </body>
 </html>
