@@ -56,7 +56,6 @@
             width: 18px;
             height: 18px;
             object-fit: contain;
-            border-radius: 3px;
         }
 
         .form-group { margin-bottom: 14px; }
@@ -118,11 +117,11 @@
                         </div>
                         <div class="channel-actions">
                             <button class="btn btn-pay btn-sm" onclick="initiatePayment('Kripto Analiz VIP', 150)">
-                                <img src="https://img.icons8.com/material-outlined/24/ffffff/card-in-use.png" class="btn-icon" alt="pay">
+                                <img src="btn_pay.png" class="btn-icon" alt="pay">
                                 Satın Al
                             </button>
                             <button class="btn btn-sm" onclick="copyRef('kripto_vip')">
-                                <img src="https://img.icons8.com/material-outlined/24/0f172a/link.png" class="btn-icon" alt="link">
+                                <img src="btn_link.png" class="btn-icon" alt="link">
                                 Referans Linki
                             </button>
                         </div>
@@ -165,7 +164,7 @@
                 </div>
 
                 <button class="btn" id="btnAskAi" onclick="askAiEngine()">
-                    <img src="https://img.icons8.com/material-outlined/24/0f172a/brain.png" class="btn-icon" alt="ai">
+                    <img src="btn_ai.png" class="btn-icon" alt="ai">
                     AI Analizini Başlat
                 </button>
 
@@ -196,7 +195,7 @@
                         <input type="text" id="payoutIban" class="form-control" placeholder="TR..." required>
                     </div>
                     <button type="submit" class="btn">
-                        <img src="https://img.icons8.com/material-outlined/24/0f172a/get-cash.png" class="btn-icon" alt="payout">
+                        <img src="btn_payout.png" class="btn-icon" alt="payout">
                         Çekim Talebi Gönder
                     </button>
                 </form>
@@ -243,7 +242,7 @@
                         <input type="text" id="chanLink" class="form-control" placeholder="https://t.me/kanaliniz" required>
                     </div>
                     <button type="submit" class="btn">
-                        <img src="https://img.icons8.com/material-outlined/24/0f172a/add.png" class="btn-icon" alt="add">
+                        <img src="btn_add.png" class="btn-icon" alt="add">
                         Başvuruyu Gönder
                     </button>
                 </form>
@@ -255,19 +254,19 @@
     <!-- ALT SEKMELER -->
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="switchTab('directory', this)">
-            <img src="https://img.icons8.com/material-outlined/24/94a3b8/search.png" class="tab-btn-icon" alt="dir">
+            <img src="tab_dir.png" class="tab-btn-icon" alt="dir">
             Dizin
         </button>
         <button class="tab-btn" onclick="switchTab('ai', this)">
-            <img src="https://img.icons8.com/material-outlined/24/94a3b8/brain.png" class="tab-btn-icon" alt="ai">
+            <img src="tab_ai.png" class="tab-btn-icon" alt="ai">
             Yapay Zeka
         </button>
         <button class="tab-btn" onclick="switchTab('wallet', this)">
-            <img src="https://img.icons8.com/material-outlined/24/94a3b8/wallet.png" class="tab-btn-icon" alt="wallet">
+            <img src="tab_wallet.png" class="tab-btn-icon" alt="wallet">
             Cüzdan
         </button>
         <button class="tab-btn" onclick="switchTab('submit', this)">
-            <img src="https://img.icons8.com/material-outlined/24/94a3b8/plus-key.png" class="tab-btn-icon" alt="add">
+            <img src="tab_submit.png" class="tab-btn-icon" alt="add">
             Kanal Ekle
         </button>
     </div>
@@ -320,7 +319,7 @@
                     title: title,
                     price: price
                 }));
-                alert(`"${title}" ödeme işlemi bota iletildi. Telegram sohbetinizden ödeme detayına ulaşabilirsiniz.`);
+                alert(`"${title}" ödeme işlemi bota iletildi.`);
             } else {
                 alert("Ödeme fonksiyonu Telegram uygulamasında aktiftir.");
             }
